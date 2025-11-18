@@ -38,6 +38,7 @@ namespace GymMangementPL
 
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<ISessionRepository, SessionRepository>();
+            builder.Services.AddScoped<IMemberShipRepository, MemberShipRepository>();
             
             //builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             //builder.Services.AddAutoMapper(typeof(Program).Assembly);
@@ -58,7 +59,7 @@ namespace GymMangementPL
                 config.Password.RequireUppercase = true;
                 config.User.RequireUniqueEmail = true;
             }).AddEntityFrameworkStores<GymDbContext>();
-
+            builder.Services.AddScoped<IMemberShipService, MemberShipService>();
 
             builder.Services.ConfigureApplicationCookie(opt =>
             {

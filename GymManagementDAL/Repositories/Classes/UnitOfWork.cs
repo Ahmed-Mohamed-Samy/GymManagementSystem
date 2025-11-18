@@ -13,10 +13,11 @@ namespace GymManagementDAL.Repositories.Classes
     {
         private readonly GymDbContext _dbContext;
 
-        public UnitOfWork(GymDbContext dbContext,ISessionRepository sessionRepository) 
+        public UnitOfWork(GymDbContext dbContext,ISessionRepository sessionRepository , IMemberShipRepository memberShipRepository) 
         {
             _dbContext = dbContext;
             SessionRepository = sessionRepository;
+            MemberShipRepository = memberShipRepository;
         }
 
 
@@ -24,14 +25,10 @@ namespace GymManagementDAL.Repositories.Classes
         private readonly Dictionary<Type,object> _repositories = new();
 
         public ISessionRepository SessionRepository { get; }
-
-        // Key => Member , Trainer
-        // Value => GenericRepostitory<Member>() , GenericRepostitory<Trainer>()
+        public IMemberShipRepository MemberShipRepository { get; }
 
         public IGenericRepostitory<TEntity> GetRepository<TEntity>() where TEntity : BaseEntity, new()
         {
-            
-            
             
             var EntityType = typeof(TEntity);
             if (_repositories.ContainsKey(EntityType))
@@ -43,16 +40,7 @@ namespace GymManagementDAL.Repositories.Classes
 
             return newRepo;
             
-            
-            //return new GenericRepostitory<TEntity>(_dbContext);
         }
-        // Create many numbers of objects
-        //GenericRepostitory<Member>
-        //GenericRepostitory<Member>
-        //GenericRepostitory<Member>
-        //GenericRepostitory<Member>
-        //GenericRepostitory<Member>
-        //GenericRepostitory<Member>
 
         public int SaveChanges()
         {
