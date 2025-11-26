@@ -60,7 +60,7 @@
                                asp-controller="MemberShip" asp-action="Index">Memberships</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link  px-3 py-2 mx-2 fw-bolder fs-5" aria-current="page" href="#">
+                            <a class="nav-link  px-3 py-2 mx-2 fw-bolder fs-5 @(CurrentController == "Booking" ? "active" : "")" aria-current="page" asp-controller="Booking" asp-action="Index">
                                 Sessions
                                 Schedule
                             </a>

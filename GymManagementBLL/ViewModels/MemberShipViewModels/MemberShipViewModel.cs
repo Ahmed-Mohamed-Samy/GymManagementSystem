@@ -13,5 +13,6 @@ namespace GymManagementBLL.ViewModels.MemberShipViewModels
         public string PlanName { get; set; } = null!;
         public string StartDate { get; set; } = null!;
         public string EndDate { get; set; } = null!;
+        public int MemberId { get; set; }
     }
 }

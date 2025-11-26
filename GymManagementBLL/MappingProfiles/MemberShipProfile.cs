@@ -18,6 +18,12 @@ namespace GymManagementBLL.MappingProfiles
                 .ForMember(dest => dest.PlanName, opt => opt.MapFrom(src => src.Plan.Name))
                 .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.CreatedAt.ToString("MMM dd, yyyy")))
                 .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.EndDate.ToString("MMM dd, yyyy")));
+
+            CreateMap<CreateMembershipViewModel, MemberShip>();
+
+            CreateMap<Member, MemberSelectViewModel>();
+            CreateMap<Plan, PlanSelectViewModel>();
+
         }
     }
 }

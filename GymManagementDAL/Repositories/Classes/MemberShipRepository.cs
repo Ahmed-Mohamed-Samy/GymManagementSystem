@@ -19,9 +19,11 @@ namespace GymManagementDAL.Repositories.Classes
             _dbContext = dbContext;
         }
 
-        public IEnumerable<MemberShip> GetMemberShipsWithMemberAndPlan()
-        {
-            return _dbContext.MemberShips.Include(MS => MS.Member).Include(MS => MS.Plan).AsNoTracking().ToList();
-        }
+        public MemberShip? GetFirstMemberShip(Func<MemberShip, bool>? filter = null) => _dbContext.MemberShips.FirstOrDefault(filter ?? (_ => true));
+
+
+        public IEnumerable<MemberShip> GetMemberShipsWithMemberAndPlan(Func<MemberShip, bool>? filter = null)
+        => _dbContext.MemberShips.Include(MS => MS.Member).Include(MS => MS.Plan).Where(filter ?? (_ => true)).ToList();
+        
     }
 }

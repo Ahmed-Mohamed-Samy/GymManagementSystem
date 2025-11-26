@@ -25,24 +25,17 @@ namespace GymMangementPL
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
-            //builder.Services.AddDbContext<GymDbContext>(options =>
-            //{
-            //    //options.UseSqlServer(builder.Configuration.GetSection("ConnectionStrings")["DefaultConnection"]);
-            //    //options.UseSqlServer(builder.Configuration["ConnectionStrings:DefaultConnection"]);
-            //    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-            //});
+
             
             builder.Services.AddDbContext<GymDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-            //builder.Services.AddScoped(typeof(IGenericRepostitory<>), typeof(GenericRepostitory<>));
+           
 
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<ISessionRepository, SessionRepository>();
             builder.Services.AddScoped<IMemberShipRepository, MemberShipRepository>();
+            builder.Services.AddScoped<IBookingRepository, BookingRepository>();
             
-            //builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-            //builder.Services.AddAutoMapper(typeof(Program).Assembly);
-            //builder.Services.AddAutoMapper(typeof(MemberProfile));
 
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
@@ -52,6 +45,8 @@ namespace GymMangementPL
             builder.Services.AddScoped<ISessionService, SessionService>();
             builder.Services.AddScoped<IAttachmentService, AttachmentService>();
             builder.Services.AddScoped<IAccountService, AccountService>();
+            builder.Services.AddScoped<IMemberShipService, MemberShipService>();
+            builder.Services.AddScoped<IBookingService, BookingService>();
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>(config =>
             {
                 config.Password.RequiredLength = 6;
@@ -59,7 +54,6 @@ namespace GymMangementPL
                 config.Password.RequireUppercase = true;
                 config.User.RequireUniqueEmail = true;
             }).AddEntityFrameworkStores<GymDbContext>();
-            builder.Services.AddScoped<IMemberShipService, MemberShipService>();
 
             builder.Services.ConfigureApplicationCookie(opt =>
             {

@@ -1,4 +1,7 @@
 ﻿@model IEnumerable<MemberShipViewModel> 
+@{
+    ViewData["Title"] = "ActiveMemberships";
+}
 
 <div class="container-fluid">
     <header class="bg-primary text-white rounded-3 p-4 shadow-sm mt-5 mb-4">
@@ -15,17 +18,24 @@
         </div>
     </header>
 
-    @* <div id="Alert" class="alert alert-success alert-dismissible fade show">
-        <i class="bi bi-check-circle-fill me-2"></i>
-        Success Message
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
+    @if(TempData["SuccessMessage"] is not null)
+    {
+        <div id="Alert" class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
 
-    <div id="Alert" class="alert alert-danger alert-dismissible fade show">
-        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-        Error Message
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div> *@
+    @if(TempData["ErrorMessage"] is not null)
+    {
+        <div id="Alert" class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
 
     <div class="card">
         <div class="card-body">
@@ -58,8 +68,8 @@
                                 <td>@memberShip.EndDate</td>
                                 <td>
                                     <div class="d-flex gap-1">
-                                        <form method="post" href="membership/cancel" class="m-0">
-                                            <input type="hidden" name="id" value="" />
+                                        <form method="post" asp-action="Cancel" class="m-0">
+                                            <input type="hidden" name="id" value="@memberShip.MemberId" />
                                             <button type="submit" class="btn btn-sm btn-danger">
                                                 <i class="fas fa-times"></i> Cancel
                                             </button>
