@@ -21,7 +21,7 @@ namespace GymManagementBLL.AttachmentService
             _webHostEnvironment = webHostEnvironment;
         }
 
-        public string? Upload(string FolderName, IFormFile File)
+        public async Task<string?> UploadAsync(string FolderName, IFormFile File)
         {
             try
             {
@@ -44,7 +44,7 @@ namespace GymManagementBLL.AttachmentService
 
                 using var FileStream = new FileStream(FilePath, FileMode.Create);
 
-                File.CopyTo(FileStream);
+                await File.CopyToAsync(FileStream);
 
                 return FileName;
             }

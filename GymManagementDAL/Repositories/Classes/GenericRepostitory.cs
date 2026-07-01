@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -21,7 +22,7 @@ namespace GymManagementDAL.Repositories.Classes
 
 
 
-        public void Add(TEntity entity) => _dbContext.Set<TEntity>().Add(entity);
+        public async Task AddAsync(TEntity entity) => await _dbContext.Set<TEntity>().AddAsync(entity);
        
             
         
@@ -30,22 +31,26 @@ namespace GymManagementDAL.Repositories.Classes
            
         
 
-        public IEnumerable<TEntity> GetAll(Func<TEntity, bool>? Conditon = null)
+        public async Task<IEnumerable<TEntity>> GetAllAsync(Expression<Func<TEntity, bool>>? condition = null)
         {
-            if (Conditon is null)
-                return _dbContext.Set<TEntity>().AsNoTracking().ToList();
+            if (condition is null)
+                return await _dbContext.Set<TEntity>().AsNoTracking().ToListAsync();
 
-            return _dbContext.Set<TEntity>().AsNoTracking().Where(Conditon).ToList();
+            return await _dbContext.Set<TEntity>().AsNoTracking().Where(condition).ToListAsync();
         }
 
 
 
-        public TEntity? GetById(int id) => _dbContext.Set<TEntity>().Find(id);
+        public async Task<TEntity?> GetByIdAsync(int id) => await _dbContext.Set<TEntity>().FindAsync(id);
 
 
 
         public void Update(TEntity entity) => _dbContext.Set<TEntity>().Update(entity);
-          
-        
+
+        public async Task<int> CountAsync(Expression<Func<TEntity, bool>>? condition = null) => await _dbContext.Set<TEntity>().CountAsync(condition ?? (_ => true));
+
+        public async Task<TEntity?> GetFirstOrDefaultAsync(Expression<Func<TEntity, bool>>? condition = null)
+        => await _dbContext.Set<TEntity>().FirstOrDefaultAsync(condition ?? (_ => true));
+
     }
 }

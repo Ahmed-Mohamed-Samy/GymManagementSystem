@@ -25,43 +25,43 @@ namespace GymManagementBLL.Services.Classes
         }
 
 
-        public IEnumerable<SessionViewModel> GetAllSessionsWithTrainerAndCategory()
+        public async Task<IEnumerable<SessionViewModel>> GetAllSessionsWithTrainerAndCategoryAsync()
         {
             var sessionRepo = _unitOfWork.SessionRepository;
-            var sessions = sessionRepo.GetAllSessionsWithTrainersAndCategories();
+            var sessions = await sessionRepo.GetAllSessionsWithTrainersAndCategoriesAsync();
 
             if (sessions is null) return [];
 
             var MappedSessions = _mapper.Map<IEnumerable<SessionViewModel>>(sessions);
             foreach (var session in MappedSessions)
-                session.AvailableSlots = session.Capacity - sessionRepo.GetCountOfBookedSlots(session.Id);
+                session.AvailableSlots = session.Capacity - await sessionRepo.GetCountOfBookedSlotsAsync(session.Id);
 
             return MappedSessions;
         }
-        public IEnumerable<MemberForSessionViewModel> GetAllMembersForSession(int id)
+        public async Task<IEnumerable<MemberForSessionViewModel>> GetAllMembersForSessionAsync(int id)
         {
             var BookingRepo = _unitOfWork.BookingRepository;
-            var MembersForSession = BookingRepo.GetSessionById(id);
+            var MembersForSession = await BookingRepo.GetSessionByIdAsync(id);
             if (MembersForSession is null) return [];
 
 
             return _mapper.Map<IEnumerable<MemberForSessionViewModel>>(MembersForSession);
         }
 
-        public bool CreateBooking(CreateBookingViewModel createBooking)
+        public async Task<bool> CreateBookingAsync(CreateBookingViewModel createBooking)
         {
             try
             {
                 var SessionRepo = _unitOfWork.SessionRepository;
-                var Session = SessionRepo.GetById(createBooking.SessionId);
+                var Session = await SessionRepo.GetByIdAsync(createBooking.SessionId);
 
                 if (Session is null || Session.StartDate <= DateTime.UtcNow) return false;
 
-                var ActiveMembershipForMember = _unitOfWork.MemberShipRepository.GetFirstMemberShip(m => m.Status.ToLower() == "active" && m.MemberId == createBooking.MemberId);
+                var ActiveMembershipForMember = await _unitOfWork.MemberShipRepository.GetFirstMemberShipAsync(m => m.EndDate > DateTime.UtcNow && m.MemberId == createBooking.MemberId);
 
                 if (ActiveMembershipForMember is null) return false;
 
-                var BookedSlots = SessionRepo.GetCountOfBookedSlots(createBooking.SessionId);
+                var BookedSlots = await SessionRepo.GetCountOfBookedSlotsAsync(createBooking.SessionId);
 
                 var AvailableSlots = Session.Capacity - BookedSlots;
 
@@ -70,27 +70,27 @@ namespace GymManagementBLL.Services.Classes
                 var Booking = _mapper.Map<MemberSession>(createBooking);
 
 
-                _unitOfWork.BookingRepository.Add(Booking);
+                await _unitOfWork.BookingRepository.AddAsync(Booking);
 
-                return _unitOfWork.SaveChanges() > 0;
+                return await _unitOfWork.SaveChangesAsync() > 0;
             }catch (Exception ex)
             {
                 return false;
             }
 
         }
-        public bool CancelBooking(MemberAttendOrCancelViewModel model)
+        public async Task<bool> CancelBookingAsync(MemberAttendOrCancelViewModel model)
         {
             try
             {
-                var Session = _unitOfWork.SessionRepository.GetById(model.SessionId);
+                var Session = await _unitOfWork.SessionRepository.GetByIdAsync(model.SessionId);
                 if (Session is null || Session.StartDate <= DateTime.UtcNow || Session.EndDate < DateTime.UtcNow) return false;
 
-                var Booking = _unitOfWork.BookingRepository.GetAll(B => B.SessionId == model.SessionId && B.MemberId == model.MemberId).FirstOrDefault();
+                var Booking = await _unitOfWork.BookingRepository.GetFirstOrDefaultAsync(B => B.SessionId == model.SessionId && B.MemberId == model.MemberId);
                 if (Booking is null) return false;
 
                 _unitOfWork.BookingRepository.Delete(Booking);
-                return _unitOfWork.SaveChanges() > 0;
+                return await _unitOfWork.SaveChangesAsync() > 0;
             }
             catch (Exception ex)
             {
@@ -99,21 +99,21 @@ namespace GymManagementBLL.Services.Classes
 
         }
 
-        public bool MemberAttend(MemberAttendOrCancelViewModel model)
+        public async Task<bool> MemberAttendAsync(MemberAttendOrCancelViewModel model)
         {
             try
             {
-                var Session = _unitOfWork.SessionRepository.GetById(model.SessionId);
+                var Session = await _unitOfWork.SessionRepository.GetByIdAsync(model.SessionId);
                 if (Session is null) return false;
 
-                var Booking = _unitOfWork.BookingRepository.GetAll(B => B.SessionId == model.SessionId && B.MemberId == model.MemberId).FirstOrDefault();
+                var Booking = await _unitOfWork.BookingRepository.GetFirstOrDefaultAsync(B => B.SessionId == model.SessionId && B.MemberId == model.MemberId);
                 if (Booking is null) return false;
 
                 Booking.IsAttended = true;
                 Booking.UpdatedAt = DateTime.UtcNow;
 
                 _unitOfWork.BookingRepository.Update(Booking);
-                return _unitOfWork.SaveChanges() > 0;
+                return await _unitOfWork.SaveChangesAsync() > 0;
             }
             catch (Exception ex)
             {
@@ -123,12 +123,12 @@ namespace GymManagementBLL.Services.Classes
 
         #region Helper Methods
 
-        public IEnumerable<MemberSelectViewModel> GetMembersForDropDown(int id)
+        public async Task<IEnumerable<MemberSelectViewModel>> GetMembersForDropDownAsync(int id)
         {
             var BookingRepo = _unitOfWork.BookingRepository;
-            var bookMemberIds = BookingRepo.GetAll(S => S.Id == id).Select(ms => ms.MemberId).ToList();
+            var bookMemberIds = await BookingRepo.GetMembersIdsAsync(S => S.SessionId == id);
 
-            var MembersAvailableToBook = _unitOfWork.GetRepository<Member>().GetAll(M => !bookMemberIds.Contains(M.Id));
+            var MembersAvailableToBook = await _unitOfWork.GetRepository<Member>().GetAllAsync(M => !bookMemberIds.Contains(M.Id));
 
             return _mapper.Map<IEnumerable<MemberSelectViewModel>>(MembersAvailableToBook);
 

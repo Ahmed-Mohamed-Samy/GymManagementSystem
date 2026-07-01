@@ -23,9 +23,9 @@ namespace GymManagementBLL.Services.Classes
         }
 
 
-        public IEnumerable<PlanViewModel> GetAllPlans()
+        public async Task<IEnumerable<PlanViewModel>> GetAllPlansAsync()
         {
-            var Plans = _unitOfWork.GetRepository<Plan>().GetAll();
+            var Plans = await _unitOfWork.GetRepository<Plan>().GetAllAsync();
 
             if (Plans == null || !Plans.Any()) return [];
 
@@ -36,9 +36,9 @@ namespace GymManagementBLL.Services.Classes
 
         }
 
-        public PlanViewModel? GetPlanDetails(int id)
+        public async Task<PlanViewModel?> GetPlanDetailsAsync(int id)
         {
-            var Plan = _unitOfWork.GetRepository<Plan>().GetById(id);
+            var Plan = await _unitOfWork.GetRepository<Plan>().GetByIdAsync(id);
             if (Plan == null) return null;
 
             var PlanMapped = _mapper.Map<PlanViewModel>(Plan);
@@ -46,15 +46,15 @@ namespace GymManagementBLL.Services.Classes
             return PlanMapped;
         }
 
-        public UpdatePlanViewModel? GetPlanToUpdate(int planId)
+        public async Task<UpdatePlanViewModel?> GetPlanToUpdateAsync(int planId)
         {
             
             
             
             
-            var Plan = _unitOfWork.GetRepository<Plan>().GetById(planId);
+            var Plan = await _unitOfWork.GetRepository<Plan>().GetByIdAsync(planId);
 
-            if (Plan is null || HasActiveMemberShips(planId)) return null;
+            if (Plan is null ||await HasActiveMemberShipsAsync(planId)) return null;
 
           
             var PlanMappedToUpdate = _mapper.Map<UpdatePlanViewModel>(Plan);
@@ -63,14 +63,14 @@ namespace GymManagementBLL.Services.Classes
 
         }
 
-        public bool ToggleStatus(int planId)
+        public async Task<bool> ToggleStatusAsync(int planId)
         {
 
 
             var planRepo = _unitOfWork.GetRepository<Plan>();
-            var plan = planRepo.GetById(planId);
+            var plan = await planRepo.GetByIdAsync(planId);
 
-            if (plan is null || HasActiveMemberShips(planId)) return false;
+            if (plan is null || await HasActiveMemberShipsAsync(planId)) return false;
 
             
             plan.IsActive = !plan.IsActive;
@@ -78,7 +78,7 @@ namespace GymManagementBLL.Services.Classes
             try
             {
                 planRepo.Update(plan);
-                return _unitOfWork.SaveChanges() > 0;
+                return await _unitOfWork.SaveChangesAsync() > 0;
             }
             catch
             {
@@ -90,7 +90,7 @@ namespace GymManagementBLL.Services.Classes
 
         }
 
-        public bool UpdatePlan(int planId, UpdatePlanViewModel updatePlan)
+        public async Task<bool> UpdatePlanAsync(int planId, UpdatePlanViewModel updatePlan)
         {
 
             try
@@ -98,10 +98,10 @@ namespace GymManagementBLL.Services.Classes
                 var planRepo = _unitOfWork.GetRepository<Plan>();
 
 
-                var Plan = planRepo.GetById(planId);
+                var Plan = await planRepo.GetByIdAsync(planId);
 
 
-                if (Plan is null || HasActiveMemberShips(planId)) return false;
+                if (Plan is null || await HasActiveMemberShipsAsync(planId)) return false;
 
                 _mapper.Map(updatePlan,Plan);
              
@@ -110,7 +110,7 @@ namespace GymManagementBLL.Services.Classes
 
                 planRepo.Update(Plan);
 
-                return _unitOfWork.SaveChanges() > 0;
+                return await _unitOfWork.SaveChangesAsync() > 0;
             }
             catch
             {
@@ -123,9 +123,9 @@ namespace GymManagementBLL.Services.Classes
         #region Helper Methods
 
 
-        private bool HasActiveMemberShips(int planId)
+        private async Task<bool> HasActiveMemberShipsAsync(int planId)
         {
-            return _unitOfWork.GetRepository<MemberShip>().GetAll(MS => MS.PlanId == planId && MS.Status == "Active").Any();
+            return await _unitOfWork.GetRepository<MemberShip>().GetFirstOrDefaultAsync(MS => MS.PlanId == planId && MS.EndDate > DateTime.UtcNow) is not null;
         } 
 
         #endregion

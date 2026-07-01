@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -19,11 +20,11 @@ namespace GymManagementDAL.Repositories.Classes
             _dbContext = dbContext;
         }
 
-        public MemberShip? GetFirstMemberShip(Func<MemberShip, bool>? filter = null) => _dbContext.MemberShips.FirstOrDefault(filter ?? (_ => true));
+        public async Task<MemberShip?> GetFirstMemberShipAsync(Expression<Func<MemberShip, bool>>? filter = null) => await _dbContext.MemberShips.FirstOrDefaultAsync(filter ?? (_ => true));
 
 
-        public IEnumerable<MemberShip> GetMemberShipsWithMemberAndPlan(Func<MemberShip, bool>? filter = null)
-        => _dbContext.MemberShips.Include(MS => MS.Member).Include(MS => MS.Plan).Where(filter ?? (_ => true)).ToList();
+        public async Task<IEnumerable<MemberShip>> GetMemberShipsWithMemberAndPlanAsync(Expression<Func<MemberShip, bool>>? filter = null)
+        => await _dbContext.MemberShips.Include(MS => MS.Member).Include(MS => MS.Plan).Where(filter ?? (_ => true)).ToListAsync();
         
     }
 }

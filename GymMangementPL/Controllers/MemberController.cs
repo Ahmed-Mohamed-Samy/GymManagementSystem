@@ -3,6 +3,7 @@ using GymManagementBLL.ViewModels.MemberViewModel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Threading.Tasks;
 
 namespace GymManagementPL.Controllers
 {
@@ -17,10 +18,10 @@ namespace GymManagementPL.Controllers
         }
 
         #region Get All Members
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
 
-            var Members = _memberService.GetAllMembers();
+            var Members = await _memberService.GetAllMembersAsync();
             return View(Members);
         }
         #endregion
@@ -28,7 +29,7 @@ namespace GymManagementPL.Controllers
 
         #region Get Member Data 
 
-        public ActionResult MemberDetails(int id)
+        public async Task<ActionResult> MemberDetails(int id)
         {
 
             if (id <= 0)
@@ -38,7 +39,7 @@ namespace GymManagementPL.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var Member = _memberService.GetMemberDetails(id);
+            var Member = await _memberService.GetMemberDetailsAsync(id);
             
             if (Member is null)
             {
@@ -51,7 +52,7 @@ namespace GymManagementPL.Controllers
             return View(Member);
         }
 
-        public ActionResult HealthRecordDetails([FromRoute]int id)
+        public async Task<ActionResult> HealthRecordDetails([FromRoute]int id)
         {
             if(id <= 0)
             {
@@ -60,7 +61,7 @@ namespace GymManagementPL.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var HealthRecord = _memberService.GetMemberHealthRecordDetails(id);
+            var HealthRecord = await _memberService.GetMemberHealthRecordDetailsAsync(id);
 
             if (HealthRecord is null)
             {
@@ -81,7 +82,7 @@ namespace GymManagementPL.Controllers
         }
 
         [HttpPost]
-        public ActionResult CreateMember(CreateMemberViewModel createMember)
+        public async Task<ActionResult> CreateMember(CreateMemberViewModel createMember)
         {
             if(!ModelState.IsValid)
             {
@@ -89,7 +90,7 @@ namespace GymManagementPL.Controllers
                 return View(nameof(Create),createMember);
             }
 
-            bool Result = _memberService.CreateMember(createMember);
+            bool Result = await _memberService.CreateMemberAsync(createMember);
 
             if(Result)
             {
@@ -109,7 +110,7 @@ namespace GymManagementPL.Controllers
         #region Update Member
 
 
-        public ActionResult Edit(int id)
+        public async Task<ActionResult> Edit(int id)
         {
 
             if (id <= 0)
@@ -119,7 +120,7 @@ namespace GymManagementPL.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var Member = _memberService.GetMemberToUpdate(id);
+            var Member = await _memberService.GetMemberToUpdateAsync(id);
 
             if (Member is null)
             {
@@ -131,13 +132,13 @@ namespace GymManagementPL.Controllers
 
 
         [HttpPost]
-        public ActionResult Edit([FromRoute]int id,MemberToUpdateViewModel viewModel)
+        public async Task<ActionResult> Edit([FromRoute]int id,MemberToUpdateViewModel viewModel)
         {
             if (!ModelState.IsValid)
                 return View(viewModel);
 
 
-            var Result = _memberService.UpdateMember(id, viewModel);
+            var Result = await _memberService.UpdateMemberAsync(id, viewModel);
 
 
             if (Result)
@@ -157,7 +158,7 @@ namespace GymManagementPL.Controllers
 
         #region Delete Member
 
-        public ActionResult Delete(int id)
+        public async Task<ActionResult> Delete(int id)
         {
             if(id <= 0)
             {
@@ -167,7 +168,7 @@ namespace GymManagementPL.Controllers
             }
 
 
-            var Member = _memberService.GetMemberDetails(id);
+            var Member = await _memberService.GetMemberDetailsAsync(id);
 
             if (Member is null)
             {
@@ -180,9 +181,9 @@ namespace GymManagementPL.Controllers
         }
 
         [HttpPost]
-        public ActionResult DeleteConfirm(int id)
+        public async Task<ActionResult> DeleteConfirm(int id)
         {
-            var Result = _memberService.RemoveMember(id);
+            var Result = await _memberService.RemoveMemberAsync(id);
 
             if (Result)
                 TempData["SuccessMessage"] = "Member Deleted Successfully";

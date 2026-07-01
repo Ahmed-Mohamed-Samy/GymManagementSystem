@@ -13,13 +13,14 @@ using GymManagementBLL.Services.Classes;
 using Microsoft.AspNetCore.Hosting.Builder;
 using GymManagementBLL.AttachmentService;
 using Microsoft.AspNetCore.Identity;
+using System.Threading.Tasks;
 
 
 namespace GymMangementPL
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -76,8 +77,8 @@ namespace GymMangementPL
 
 
 
-            GymDbContextDataSeeding.SeedData(dbContext);
-            IdentityDbContextSeeding.SeedData(roleManager, userManager);
+            await GymDbContextDataSeeding.SeedDataAsync(dbContext);
+            await IdentityDbContextSeeding.SeedDataAsync(roleManager, userManager);
 
 
 
@@ -101,7 +102,7 @@ namespace GymMangementPL
                 pattern: "{controller=Account}/{action=Login}/{id?}")
                 .WithStaticAssets();
 
-            app.Run();
+            await app.RunAsync();
         }
     }
 }

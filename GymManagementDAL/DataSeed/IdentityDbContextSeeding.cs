@@ -1,5 +1,6 @@
 ﻿using GymManagementDAL.Entities;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,13 +11,13 @@ namespace GymManagementDAL.DataSeed
 {
     public static class IdentityDbContextSeeding
     {
-        public static bool SeedData(RoleManager<IdentityRole> roleManager,UserManager<ApplicationUser> userManager)
+        public static async Task<bool> SeedDataAsync(RoleManager<IdentityRole> roleManager,UserManager<ApplicationUser> userManager)
         {
             try
             {
-                var HasUsers = userManager.Users.Any();
+                var HasUsers = await userManager.Users.AnyAsync();
 
-                var HasRoles = roleManager.Roles.Any();
+                var HasRoles = await roleManager.Roles.AnyAsync();
 
                 if (HasUsers && HasRoles) return false;
                 
@@ -30,10 +31,12 @@ namespace GymManagementDAL.DataSeed
 
                     foreach(var Role in Roles)
                     {
-                        if(!roleManager.RoleExistsAsync(Role.Name!).Result)
-                        {
-                            roleManager.CreateAsync(Role).Wait();
-                        }
+                        var IsRoleExist = await roleManager.RoleExistsAsync(Role.Name!);
+
+
+                        if (!IsRoleExist)
+                            await roleManager.CreateAsync(Role);
+                        
 
                     }
 
@@ -50,8 +53,8 @@ namespace GymManagementDAL.DataSeed
                         PhoneNumber = "01016334658"
                     };
 
-                    userManager.CreateAsync(MainAdmin,"P@ssw0rd").Wait();
-                    userManager.AddToRoleAsync(MainAdmin, "SuperAdmin").Wait();
+                    await userManager.CreateAsync(MainAdmin,"P@ssw0rd");
+                    await userManager.AddToRoleAsync(MainAdmin, "SuperAdmin");
 
 
                     var Admin = new ApplicationUser()
@@ -63,8 +66,8 @@ namespace GymManagementDAL.DataSeed
                         PhoneNumber = "01015151515"
                     };
 
-                    userManager.CreateAsync(Admin, "P@ssw0rd").Wait();
-                    userManager.AddToRoleAsync(Admin, "Admin").Wait();
+                    await userManager.CreateAsync(Admin, "P@ssw0rd");
+                    await userManager.AddToRoleAsync(Admin, "Admin");
 
                 }
 

@@ -23,20 +23,20 @@ namespace GymManagementBLL.Services.Classes
             _mapper = mapper;
         }
 
-        public bool CreateTrainer(CreateTrainerViewModel createTrainer)
+        public async Task<bool> CreateTrainerAsync(CreateTrainerViewModel createTrainer)
         {
             try
             {
                 if (createTrainer is null) return false;
 
 
-                if (IsEmailExists(createTrainer.Email) || IsPhoneExists(createTrainer.Phone)) return false;
+                if (await IsEmailExistsAsync(createTrainer.Email) || await IsPhoneExistsAsync(createTrainer.Phone)) return false;
 
                 var trainer = _mapper.Map<Trainer>(createTrainer);
 
-                _unitOfWork.GetRepository<Trainer>().Add(trainer);
+                await _unitOfWork.GetRepository<Trainer>().AddAsync(trainer);
 
-                return _unitOfWork.SaveChanges() > 0;
+                return await _unitOfWork.SaveChangesAsync() > 0;
             }
             catch
             {
@@ -45,9 +45,9 @@ namespace GymManagementBLL.Services.Classes
 
         }
 
-        public IEnumerable<TrainerViewModel> GetAllTrainers()
+        public async Task<IEnumerable<TrainerViewModel>> GetAllTrainersAsync()
         {
-            var Trainers = _unitOfWork.GetRepository<Trainer>().GetAll();
+            var Trainers = await _unitOfWork.GetRepository<Trainer>().GetAllAsync();
 
             if (Trainers is null || !Trainers.Any()) return [];
 
@@ -57,9 +57,9 @@ namespace GymManagementBLL.Services.Classes
 
         }
 
-        public TrainerDetailsViewModel? GetTrainerDetails(int id)
+        public async Task<TrainerDetailsViewModel?> GetTrainerDetailsAsync(int id)
         {
-            var trainer = _unitOfWork.GetRepository<Trainer>().GetById(id);
+            var trainer = await _unitOfWork.GetRepository<Trainer>().GetByIdAsync(id);
 
 
             if(trainer is null) return null;
@@ -69,9 +69,9 @@ namespace GymManagementBLL.Services.Classes
 
         }
 
-        public TrianerToUpdateViewModel? GetTrainerToUpdate(int id)
+        public async Task<TrianerToUpdateViewModel?> GetTrainerToUpdateAsync(int id)
         {
-            var trainer = _unitOfWork.GetRepository<Trainer>().GetById(id);
+            var trainer = await _unitOfWork.GetRepository<Trainer>().GetByIdAsync(id);
 
             if(trainer is null) return null;
 
@@ -81,23 +81,23 @@ namespace GymManagementBLL.Services.Classes
             return TrainerToUpdate;
         }
 
-        public bool RemoveTrainer(int id)
+        public async Task<bool> RemoveTrainerAsync(int id)
         {
             try
             {
                 
                 var trainerRepo = _unitOfWork.GetRepository<Trainer>();
-                var trainer = trainerRepo.GetById(id);
+                var trainer = await trainerRepo.GetByIdAsync(id);
 
                 if(trainer == null) return false;
 
-                var hasFutureSession = _unitOfWork.GetRepository<Session>().GetAll(S => S.TrainerId == trainer.Id && S.StartDate > DateTime.Now).Any();
+                var hasFutureSession = await _unitOfWork.GetRepository<Session>().GetAllAsync(S => S.TrainerId == trainer.Id && S.StartDate > DateTime.UtcNow);
 
-                if(hasFutureSession) return false;
+                if(hasFutureSession.Any()) return false;
 
 
                 trainerRepo.Delete(trainer);
-                return _unitOfWork.SaveChanges() > 0;
+                return await _unitOfWork.SaveChangesAsync() > 0;
 
             }
             catch
@@ -106,19 +106,19 @@ namespace GymManagementBLL.Services.Classes
             }
         }
 
-        public bool UpdateTrainer(int id, TrianerToUpdateViewModel updateTrianer)
+        public async Task<bool> UpdateTrainerAsync(int id, TrianerToUpdateViewModel updateTrianer)
         {
             try
             {
                 if (updateTrianer == null) return false;
                 var TrainerRepo = _unitOfWork.GetRepository<Trainer>();
 
-                var trainer = TrainerRepo.GetById(id);
+                var trainer = await TrainerRepo.GetByIdAsync(id);
 
-                var IsEmailExists = TrainerRepo.GetAll(T => T.Email == updateTrianer.Email && T.Id != id ).Any();
-                var IsPhoneExists = TrainerRepo.GetAll(T => T.Phone == updateTrianer.Phone && T.Id != id ).Any();
+                var IsEmailExists = await TrainerRepo.GetFirstOrDefaultAsync(T => T.Email == updateTrianer.Email && T.Id != id );
+                var IsPhoneExists = await TrainerRepo.GetFirstOrDefaultAsync(T => T.Phone == updateTrianer.Phone && T.Id != id );
 
-                if (trainer is null || IsEmailExists || IsPhoneExists) return false;
+                if (trainer is null || IsEmailExists is not null || IsPhoneExists is not null) return false;
 
                 _mapper.Map(updateTrianer, trainer);
 
@@ -126,7 +126,7 @@ namespace GymManagementBLL.Services.Classes
 
                 TrainerRepo.Update(trainer);
 
-                return _unitOfWork.SaveChanges() > 0;
+                return await _unitOfWork.SaveChangesAsync() > 0;
                 
             }
             catch
@@ -138,8 +138,8 @@ namespace GymManagementBLL.Services.Classes
 
         #region Helper Methods
 
-        bool IsEmailExists(string email)  => _unitOfWork.GetRepository<Trainer>().GetAll(T => T.Email == email).Any();
-        bool IsPhoneExists(string phone)  => _unitOfWork.GetRepository<Trainer>().GetAll(T => T.Phone == phone).Any();
+        async Task<bool> IsEmailExistsAsync(string email)  => await _unitOfWork.GetRepository<Trainer>().GetFirstOrDefaultAsync(T => T.Email == email) is not null;
+        async Task<bool> IsPhoneExistsAsync(string phone)  => await _unitOfWork.GetRepository<Trainer>().GetFirstOrDefaultAsync(T => T.Phone == phone) is not null;
 
 
 

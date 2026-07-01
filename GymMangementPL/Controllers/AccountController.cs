@@ -3,6 +3,7 @@ using GymManagementBLL.ViewModels.AccountViewModels;
 using GymManagementDAL.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace GymManagementPL.Controllers
 {
@@ -24,12 +25,12 @@ namespace GymManagementPL.Controllers
         }
 
         [HttpPost]
-        public ActionResult Login(AccountViewModel accountView)
+        public async Task<ActionResult> Login(AccountViewModel accountView)
         {
             if(!ModelState.IsValid) return View(accountView);
             
 
-            var user = _accountService.Login(accountView);
+            var user = await _accountService.LoginAsync(accountView);
 
             if(user is null)
             {
@@ -37,7 +38,7 @@ namespace GymManagementPL.Controllers
                 return View(accountView);
             }
 
-            var Result = _signInManager.PasswordSignInAsync(user, accountView.Password, accountView.RememberMe, false).Result;
+            var Result = await _signInManager.PasswordSignInAsync(user, accountView.Password, accountView.RememberMe, false);
             
             if(Result.IsNotAllowed)
                 ModelState.AddModelError("InvalidLogin", "Your Account Not Allowed");
@@ -53,9 +54,9 @@ namespace GymManagementPL.Controllers
 
 
         [HttpPost]
-        public ActionResult Logout()
+        public async Task<ActionResult> Logout()
         {
-            _signInManager.SignOutAsync().GetAwaiter().GetResult();
+            await _signInManager.SignOutAsync();
 
             return RedirectToAction(nameof(Login));
         }

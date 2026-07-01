@@ -2,6 +2,7 @@
 using GymManagementBLL.ViewModels.BookingViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Threading.Tasks;
 
 namespace GymManagementPL.Controllers
 {
@@ -14,36 +15,36 @@ namespace GymManagementPL.Controllers
             _bookingService = bookingService;
         }
 
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
-            var sessions = _bookingService.GetAllSessionsWithTrainerAndCategory();
+            var sessions = await _bookingService.GetAllSessionsWithTrainerAndCategoryAsync();
             
             return View(sessions);
         }
 
-        public ActionResult GetMembersForUpcomingSession(int id)
+        public async Task<ActionResult> GetMembersForUpcomingSession(int id)
         {
-            var members = _bookingService.GetAllMembersForSession(id);
+            var members = await _bookingService.GetAllMembersForSessionAsync(id);
             return View(members);
         }
 
-        public ActionResult GetMembersForOngoingSession(int id)
+        public async Task<ActionResult> GetMembersForOngoingSession(int id)
         {
-            var members = _bookingService.GetAllMembersForSession(id);
+            var members = await _bookingService.GetAllMembersForSessionAsync(id);
             return View(members);
         }
 
-        public ActionResult Create(int id)
+        public async Task<ActionResult> Create(int id)
         {
-            var Members = _bookingService.GetMembersForDropDown(id);
+            var Members = await _bookingService.GetMembersForDropDownAsync(id);
             ViewBag.Members = new SelectList(Members, "Id", "Name"); 
 
             return View();
         }
         [HttpPost]
-        public ActionResult Create(CreateBookingViewModel createBooking)
+        public async Task<ActionResult> Create(CreateBookingViewModel createBooking)
         {
-            var Result = _bookingService.CreateBooking(createBooking);
+            var Result = await _bookingService.CreateBookingAsync(createBooking);
 
             if(Result)
                 TempData["SuccessMessage"] = "Booking Created Successfully";
@@ -54,9 +55,9 @@ namespace GymManagementPL.Controllers
         }
 
         [HttpPost]
-        public ActionResult Cancel(MemberAttendOrCancelViewModel model)
+        public async Task<ActionResult> Cancel(MemberAttendOrCancelViewModel model)
         {
-            var Result =  _bookingService.CancelBooking(model);
+            var Result = await  _bookingService.CancelBookingAsync(model);
 
 
             if (Result)
@@ -67,9 +68,9 @@ namespace GymManagementPL.Controllers
             return RedirectToAction(nameof(GetMembersForUpcomingSession), new { id = model.SessionId });
         }
         [HttpPost]
-        public ActionResult Attended(MemberAttendOrCancelViewModel model)
+        public async Task<ActionResult> Attended(MemberAttendOrCancelViewModel model)
         {
-            var Result = _bookingService.MemberAttend(model);
+            var Result = await _bookingService.MemberAttendAsync(model);
 
 
             if (Result)

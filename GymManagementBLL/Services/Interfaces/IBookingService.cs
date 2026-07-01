@@ -11,11 +11,11 @@ namespace GymManagementBLL.Services.Interfaces
 {
     public interface IBookingService
     {
-        IEnumerable<SessionViewModel> GetAllSessionsWithTrainerAndCategory();
-        IEnumerable<MemberForSessionViewModel> GetAllMembersForSession(int id);
-        bool CreateBooking(CreateBookingViewModel createBooking);
-        IEnumerable<MemberSelectViewModel> GetMembersForDropDown(int id);
-        bool CancelBooking(MemberAttendOrCancelViewModel model);
-        bool MemberAttend(MemberAttendOrCancelViewModel model);
+        Task<IEnumerable<SessionViewModel>> GetAllSessionsWithTrainerAndCategoryAsync();
+        Task<IEnumerable<MemberForSessionViewModel>> GetAllMembersForSessionAsync(int id);
+        Task<bool> CreateBookingAsync(CreateBookingViewModel createBooking);
+        Task<IEnumerable<MemberSelectViewModel>> GetMembersForDropDownAsync(int id);
+        Task<bool> CancelBookingAsync(MemberAttendOrCancelViewModel model);
+        Task<bool> MemberAttendAsync(MemberAttendOrCancelViewModel model);
     }
 }

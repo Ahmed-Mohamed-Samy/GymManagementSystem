@@ -2,6 +2,7 @@
 using GymManagementBLL.ViewModels.MemberShipViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Threading.Tasks;
 
 namespace GymManagementPL.Controllers
 {
@@ -14,32 +15,32 @@ namespace GymManagementPL.Controllers
             _memberShipService = memberShipService;
         }
 
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
-            var MemberShips = _memberShipService.GetAllMemberShips();
+            var MemberShips = await _memberShipService.GetAllMemberShipsAsync();
             return View(MemberShips);
         }
 
-        public ActionResult Create()
+        public async Task<ActionResult> Create()
         {
 
-            LoadMembersDropDown();
-            LoadPlansDropDown();
+            await LoadMembersDropDown();
+            await LoadPlansDropDown();
             return View();
         }
 
         [HttpPost]
-        public ActionResult Create(CreateMembershipViewModel createMembership)
+        public async Task<ActionResult> Create(CreateMembershipViewModel createMembership)
         {
             if(!ModelState.IsValid)
             {
-                LoadMembersDropDown();
-                LoadPlansDropDown();
+               await LoadMembersDropDown();
+               await LoadPlansDropDown();
                 TempData["ErrorMessage"] = "Membership Can Not be Created Check Your Data";
                 return View(createMembership);
             }
 
-            var Result = _memberShipService.CreateMembership(createMembership);
+            var Result = await _memberShipService.CreateMembershipAsync(createMembership);
 
             if(Result)
             {
@@ -49,15 +50,15 @@ namespace GymManagementPL.Controllers
             else
             {
                 TempData["ErrorMessage"] = "Membership Created Failed";
-                LoadMembersDropDown();
-                LoadPlansDropDown();
+                await LoadMembersDropDown();
+                await LoadPlansDropDown();
                 return View(createMembership);
             }
         }
         [HttpPost]
-        public ActionResult Cancel(int id)
+        public async Task<ActionResult> Cancel(int id)
         {
-            var Result = _memberShipService.DeleteMemberShip(id);
+            var Result = await _memberShipService.DeleteMemberShipAsync(id);
 
             if(Result)
                 TempData["SuccessMessage"] = "Membership Cancelled Successfully";
@@ -71,14 +72,14 @@ namespace GymManagementPL.Controllers
 
         #region Helper Methods
 
-        private void LoadMembersDropDown()
+        private async Task LoadMembersDropDown()
         {
-            var Members = _memberShipService.GetAllMembersForDropdown();
+            var Members = await _memberShipService.GetAllMembersForDropdownAsync();
             ViewBag.Members = new SelectList(Members, "Id", "Name");
         }
-        private void LoadPlansDropDown()
+        private async Task LoadPlansDropDown()
         {
-            var Plans = _memberShipService.GetAllActivePlansForDropdown();
+            var Plans = await _memberShipService.GetAllActivePlansForDropdownAsync();
             ViewBag.Plans = new SelectList(Plans, "Id", "Name");
         }
 

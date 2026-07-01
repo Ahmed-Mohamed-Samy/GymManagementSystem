@@ -17,6 +17,6 @@ namespace GymManagementDAL.Repositories.Interfaces
         
         IGenericRepostitory<TEntity> GetRepository<TEntity>() where TEntity : BaseEntity, new();
 
-        int SaveChanges();
+        Task<int> SaveChangesAsync();
     }
 }

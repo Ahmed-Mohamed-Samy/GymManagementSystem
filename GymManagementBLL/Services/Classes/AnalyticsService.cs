@@ -19,16 +19,16 @@ namespace GymManagementBLL.Services.Classes
             _unitOfWork = unitOfWork;
         }
 
-        public AnalyticsViewModel GetAnalyticsData()
+        public async Task<AnalyticsViewModel> GetAnalyticsDataAsync()
         {
             return new AnalyticsViewModel()
             {
-                TotalMembers = _unitOfWork.GetRepository<Member>().GetAll().Count(),
-                ActiveMembers = _unitOfWork.GetRepository<MemberShip>().GetAll(X => X.Status == "Active").Count(),
-                TotalTrainers = _unitOfWork.GetRepository<Trainer>().GetAll().Count(),
-                UpcomingSessions = _unitOfWork.SessionRepository.GetAll(X=> X.StartDate > DateTime.Now).Count(),
-                OngoingSessions = _unitOfWork.SessionRepository.GetAll(X => X.StartDate <= DateTime.Now && X.EndDate > DateTime.Now).Count(),
-                CompletedSessions = _unitOfWork.SessionRepository.GetAll(X => X.EndDate < DateTime.Now).Count()
+                TotalMembers = await _unitOfWork.GetRepository<Member>().CountAsync(),
+                ActiveMembers = await _unitOfWork.GetRepository<MemberShip>().CountAsync(X => X.EndDate > DateTime.UtcNow),
+                TotalTrainers = await _unitOfWork.GetRepository<Trainer>().CountAsync(),
+                UpcomingSessions = await _unitOfWork.SessionRepository.CountAsync(X => X.StartDate > DateTime.UtcNow),
+                OngoingSessions = await _unitOfWork.SessionRepository.CountAsync(X => X.StartDate <= DateTime.UtcNow && X.EndDate > DateTime.UtcNow),
+                CompletedSessions = await _unitOfWork.SessionRepository.CountAsync(X => X.EndDate < DateTime.UtcNow)
             };
         }
     }

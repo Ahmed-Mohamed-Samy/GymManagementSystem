@@ -2,6 +2,7 @@
 using GymManagementBLL.ViewModels.PlanViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace GymManagementPL.Controllers
 {
@@ -16,16 +17,16 @@ namespace GymManagementPL.Controllers
         }
 
 
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
             
-            var Plans = _planService.GetAllPlans();
+            var Plans = await _planService.GetAllPlansAsync();
             
             return View(Plans);
         }
 
 
-        public ActionResult Details(int id)
+        public async Task<ActionResult> Details(int id)
         {
             if(id <= 0)
             {
@@ -33,7 +34,7 @@ namespace GymManagementPL.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var plan = _planService.GetPlanDetails(id);
+            var plan = await _planService.GetPlanDetailsAsync(id);
 
             if(plan is null)
             {
@@ -45,7 +46,7 @@ namespace GymManagementPL.Controllers
 
         }
 
-        public ActionResult Edit(int id)
+        public async Task<ActionResult> Edit(int id)
         {
             if (id <= 0)
             {
@@ -53,7 +54,7 @@ namespace GymManagementPL.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var plan = _planService.GetPlanToUpdate(id);
+            var plan = await _planService.GetPlanToUpdateAsync(id);
 
             if(plan is null)
             {
@@ -67,12 +68,12 @@ namespace GymManagementPL.Controllers
 
 
         [HttpPost]
-        public ActionResult Edit([FromRoute]int id,UpdatePlanViewModel updatePlan)
+        public async Task<ActionResult> Edit([FromRoute]int id,UpdatePlanViewModel updatePlan)
         {
             if (!ModelState.IsValid)
                 return View(updatePlan);
 
-            var Result = _planService.UpdatePlan(id, updatePlan);
+            var Result = await _planService.UpdatePlanAsync(id, updatePlan);
 
             if(Result)
             {
@@ -86,7 +87,7 @@ namespace GymManagementPL.Controllers
             }
         }
         [HttpPost]
-        public ActionResult Activate(int id)
+        public async Task<ActionResult> Activate(int id)
         {
             if (id <= 0)
             {
@@ -94,7 +95,7 @@ namespace GymManagementPL.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var Result = _planService.ToggleStatus(id);
+            var Result = await _planService.ToggleStatusAsync(id);
 
 
             if(Result)

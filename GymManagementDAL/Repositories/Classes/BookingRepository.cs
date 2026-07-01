@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,10 +20,16 @@ namespace GymManagementDAL.Repositories.Classes
         {
             _dbContext = dbContext;
         }
-        public IEnumerable<MemberSession> GetSessionById(int sessionId)
-        => _dbContext.MemberSessions.Where(MS => MS.SessionId == sessionId)
+
+
+
+        public async Task<IEnumerable<int>> GetMembersIdsAsync(Expression<Func<MemberSession, bool>>? condition = null)
+        => await _dbContext.MemberSessions.Where(condition ?? (_ => true)).Select(ms => ms.MemberId).ToListAsync();
+
+        public async Task<IEnumerable<MemberSession>> GetSessionByIdAsync(int sessionId)
+        => await _dbContext.MemberSessions.Where(MS => MS.SessionId == sessionId)
                                     .Include(MS => MS.Member)
-                                    .ToList();
+                                    .ToListAsync();
 
     }
 }

@@ -2,6 +2,7 @@
 using GymManagementBLL.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace GymManagementPL.Controllers
 {
@@ -15,10 +16,10 @@ namespace GymManagementPL.Controllers
             _analyticsService = analyticsService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
 
-            var analtyics = _analyticsService.GetAnalyticsData();
+            var analtyics = await _analyticsService.GetAnalyticsDataAsync();
             return View(analtyics);
         }
     }

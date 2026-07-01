@@ -2,6 +2,7 @@
 using GymManagementBLL.ViewModels.TrainerViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace GymManagementPL.Controllers
 {
@@ -15,16 +16,16 @@ namespace GymManagementPL.Controllers
             _trainerService = trainerService;
         }
 
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
 
-            var trainers = _trainerService.GetAllTrainers();
+            var trainers = await _trainerService.GetAllTrainersAsync();
 
 
             return View(trainers);
         }
 
-        public ActionResult TrainerDetails(int id)
+        public async Task<ActionResult> TrainerDetails(int id)
         {
             if (id <= 0)
             {
@@ -32,7 +33,7 @@ namespace GymManagementPL.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var trainer = _trainerService.GetTrainerDetails(id);
+            var trainer = await _trainerService.GetTrainerDetailsAsync(id);
 
             if (trainer == null)
             {
@@ -51,7 +52,7 @@ namespace GymManagementPL.Controllers
             return View();
         }
         [HttpPost]
-        public ActionResult CreateTrainer(CreateTrainerViewModel createTrainer)
+        public async Task<ActionResult> CreateTrainer(CreateTrainerViewModel createTrainer)
         {
             if (!ModelState.IsValid)
             {
@@ -59,7 +60,7 @@ namespace GymManagementPL.Controllers
                 return View(nameof(Create), createTrainer);
             }
 
-            bool Result = _trainerService.CreateTrainer(createTrainer);
+            bool Result = await _trainerService.CreateTrainerAsync(createTrainer);
 
             if (Result)
             {
@@ -76,7 +77,7 @@ namespace GymManagementPL.Controllers
 
 
 
-        public ActionResult Edit(int id)
+        public async Task<ActionResult> Edit(int id)
         {
             if (id <= 0)
             {
@@ -84,7 +85,7 @@ namespace GymManagementPL.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var TrainerToUpdate = _trainerService.GetTrainerToUpdate(id);
+            var TrainerToUpdate = await _trainerService.GetTrainerToUpdateAsync(id);
 
             if (TrainerToUpdate is null)
             {
@@ -97,12 +98,12 @@ namespace GymManagementPL.Controllers
         }
 
         [HttpPost]
-        public ActionResult Edit([FromRoute] int id, TrianerToUpdateViewModel trianer)
+        public async Task<ActionResult> Edit([FromRoute] int id, TrianerToUpdateViewModel trianer)
         {
             if (!ModelState.IsValid)
                 return View(trianer);
 
-            bool Result = _trainerService.UpdateTrainer(id, trianer);
+            bool Result = await _trainerService.UpdateTrainerAsync(id, trianer);
 
 
             if (Result)
@@ -117,7 +118,7 @@ namespace GymManagementPL.Controllers
             }
         }
 
-        public ActionResult Delete(int id)
+        public async Task<ActionResult> Delete(int id)
         {
             if (id <= 0)
             {
@@ -125,7 +126,7 @@ namespace GymManagementPL.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var trainer = _trainerService.GetTrainerDetails(id);
+            var trainer = await _trainerService.GetTrainerDetailsAsync(id);
 
             if (trainer is null)
             {
@@ -139,9 +140,9 @@ namespace GymManagementPL.Controllers
 
 
         [HttpPost]
-        public ActionResult DeleteConfirmed(int id)
+        public async Task<ActionResult> DeleteConfirmed(int id)
         {
-            var Result = _trainerService.RemoveTrainer(id);
+            var Result = await _trainerService.RemoveTrainerAsync(id);
 
             if (Result)
                 TempData["SuccessMessage"] = "Trainer Deleted Successfully";

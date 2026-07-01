@@ -10,7 +10,7 @@ namespace GymManagementBLL.Services.Interfaces
 {
     public interface IAccountService
     {
-        ApplicationUser? Login(AccountViewModel accountViewModel);
+        Task<ApplicationUser?> LoginAsync(AccountViewModel accountViewModel);
 
     }
 }

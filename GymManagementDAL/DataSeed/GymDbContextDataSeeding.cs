@@ -1,5 +1,6 @@
 ﻿using GymManagementDAL.Data.Contexts;
 using GymManagementDAL.Entities;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,34 +12,34 @@ namespace GymManagementDAL.DataSeed
 {
     public static class GymDbContextDataSeeding
     {
-        public static bool SeedData(GymDbContext dbContext)
+        public static async Task<bool> SeedDataAsync(GymDbContext dbContext)
         {
             try
             {
-                var HasPlans = dbContext.Plans.Any();
-                var HasCategories = dbContext.Categories.Any();
+                var HasPlans = await dbContext.Plans.AnyAsync();
+                var HasCategories = await dbContext.Categories.AnyAsync();
 
 
                 if (HasPlans && HasCategories) return false;
 
                 if (!HasPlans)
                 {
-                    var plans = LoadDataFromJsonFile<Plan>("Plans.json");
+                    var plans = await LoadDataFromJsonFileAsync<Plan>("Plans.json");
 
                     if (plans.Any())
-                        dbContext.Plans.AddRange(plans);
+                        await dbContext.Plans.AddRangeAsync(plans);
 
                 }
 
                 if (!HasCategories)
                 {
-                    var Categories = LoadDataFromJsonFile<Category>("Categories.json");
+                    var Categories = await LoadDataFromJsonFileAsync<Category>("Categories.json");
 
                     if (Categories.Any())
-                        dbContext.Categories.AddRange(Categories);
+                        await dbContext.Categories.AddRangeAsync(Categories);
                 }
 
-                return dbContext.SaveChanges() > 0;
+                return await dbContext.SaveChangesAsync() > 0;
             }
             catch(Exception ex)
             {
@@ -48,13 +49,13 @@ namespace GymManagementDAL.DataSeed
         }
 
 
-        private static List<T> LoadDataFromJsonFile<T>(string fileName)
+        private static async Task<List<T>> LoadDataFromJsonFileAsync<T>(string fileName)
         {
             var FilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\Files", fileName);
 
             if (!File.Exists(FilePath)) throw new FileNotFoundException();
 
-            string Data = File.ReadAllText(FilePath);
+            string Data = await File.ReadAllTextAsync(FilePath);
 
             var Options = new JsonSerializerOptions()
             {
@@ -62,7 +63,7 @@ namespace GymManagementDAL.DataSeed
             };
 
 
-            return JsonSerializer.Deserialize<List<T>>(Data, Options) ?? []; // new List<T>() 
+            return JsonSerializer.Deserialize<List<T>>(Data, Options) ?? []; 
 
 
 
